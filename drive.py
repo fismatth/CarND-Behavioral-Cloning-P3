@@ -16,8 +16,6 @@ from keras.models import load_model
 import h5py
 from keras import __version__ as keras_version
 
-import cv2
-
 sio = socketio.Server()
 app = Flask(__name__)
 model = None
@@ -46,7 +44,7 @@ class SimplePIController:
 
 
 controller = SimplePIController(0.1, 0.002)
-set_speed = 9
+set_speed = 20
 controller.set_desired(set_speed)
 
 

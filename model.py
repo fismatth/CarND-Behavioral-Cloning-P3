@@ -11,7 +11,12 @@ from keras.layers.core import Dropout
 def get_img(source_path):
     filename = source_path.split('/')[-1]
     current_path = 'data/IMG/' + filename
-    return cv2.imread(current_path)
+    image = cv2.imread(current_path)
+    return image
+
+def get_blurred_img(image):
+    #gray_img = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    return cv2.blur(image, (5, 5))
 
 steering_offset = 0.1
 
@@ -36,16 +41,25 @@ def generator(samples, batch_size=32):
             for batch_sample in batch_samples:
                 center_angle = float(batch_sample[3])
                 images.append(get_img(batch_sample[0]))
+                angles.append(center_angle)
                 images.append(get_img(batch_sample[1]))
                 images.append(get_img(batch_sample[2]))
-                angles.append(center_angle)
-                angles.append(center_angle + abs(center_angle) * 3.0)
-                angles.append(center_angle - abs(center_angle) * 3.0)
-                
+                angles.append(center_angle + 1.0)
+                angles.append(center_angle - 1.0)
+                #if center_angle > 0.0:
+                #    angles.append(center_angle * 4.0)
+                #    angles.append(0.0)
+                #else:
+                #    angles.append(0.0)
+                #    angles.append(center_angle * 4.0)
+            num_img = len(images)
+            #for i in range(num_img):
+            #    images.append(cv2.flip(images[i], 1))
+            #    angles.append(-angles[i])
             num_img = len(images)
             for i in range(num_img):
-                images.append(cv2.flip(images[i], 1))
-                angles.append(-angles[i])
+                images.append(get_blurred_img(images[i]))
+                angles.append(angles[i])
 
             # trim image to only see section with road
             X_train = np.array(images)
@@ -63,18 +77,22 @@ model.add(Convolution2D(6,5,5, activation='relu'))
 model.add(MaxPooling2D())
 model.add(Convolution2D(6,5,5, activation='relu'))
 model.add(MaxPooling2D())
-model.add(Convolution2D(6,5,5, activation='relu'))
+model.add(Convolution2D(6,4,4, activation='relu'))
+model.add(MaxPooling2D())
+model.add(Convolution2D(6,4,4, activation='relu'))
 model.add(MaxPooling2D())
 model.add(Flatten())
-model.add(Dense(600))
+model.add(Dense(1000))
 model.add(Dropout(p=0.5))
-model.add(Dense(200))
+model.add(Dense(100))
+model.add(Dropout(p=0.5))
+model.add(Dense(10))
 model.add(Dropout(p=0.5))
 model.add(Dense(1))
 
 model.compile(loss='mse', optimizer='adam')
 #model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=2)
-model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=3)
+model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=2)
 
 model.save('model.h5')
 print('Model saved')
