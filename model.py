@@ -8,23 +8,16 @@ from keras.models import Sequential
 from keras.layers import Flatten, Dense, Lambda, Cropping2D, Convolution2D, MaxPooling2D
 from keras.layers.core import Dropout
 
+# get the image from the source_path in .csv log file
 def get_img(source_path):
     filename = source_path.split('/')[-1]
     current_path = 'data/IMG/' + filename
     image = cv2.imread(current_path)
     return image
 
+# get an image blurred with a gaussin kernel of size 5x5
 def get_blurred_img(image):
     return cv2.blur(image, (5, 5))
-
-samples = []
-with open('data/driving_log.csv') as csvfile:
-    reader = csv.reader(csvfile)
-    for line in reader:
-        samples.append(line)
-samples = samples[1:]
-
-train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 
 def generator(samples, batch_size=32):
     num_samples = len(samples)
@@ -59,12 +52,27 @@ def generator(samples, batch_size=32):
             y_train = np.array(angles)
             yield shuffle(X_train, y_train)
 
+#read in log file of data recording
+samples = []
+with open('data/driving_log.csv') as csvfile:
+    reader = csv.reader(csvfile)
+    for line in reader:
+        samples.append(line)
+
+# remove the header line
+samples = samples[1:]
+
+train_samples, validation_samples = train_test_split(samples, test_size=0.2)
+
 # compile and train the model using the generator function
 train_generator = generator(train_samples, batch_size=32)
 validation_generator = generator(validation_samples, batch_size=32)
 
+# build model consisting of 4 convolutional layers with max pooling and 4 fully connected layers with dropout in-between 
 model = Sequential()
+# normalize data
 model.add(Lambda(lambda x: x / 255.0 - 0.5, input_shape=(160, 320, 3)))
+# convolutional layers with max pooling
 model.add(Cropping2D(cropping=((70, 25), (0, 0))))
 model.add(Convolution2D(6,3,3, activation='relu'))
 model.add(MaxPooling2D())
@@ -75,6 +83,7 @@ model.add(MaxPooling2D())
 model.add(Convolution2D(6,2,2, activation='relu'))
 model.add(MaxPooling2D())
 model.add(Flatten())
+# fully connected layers with dropout
 model.add(Dense(2000))
 model.add(Dropout(p=0.5))
 model.add(Dense(500))
@@ -85,8 +94,10 @@ model.add(Dense(10))
 model.add(Dropout(p=0.5))
 model.add(Dense(1))
 
+# compile and train the model using adam optimizer
 model.compile(loss='mse', optimizer='adam')
 model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator, nb_val_samples=len(validation_samples), nb_epoch=2)
 
+# save the model
 model.save('model.h5')
 print('Model saved')
