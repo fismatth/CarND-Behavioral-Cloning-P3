@@ -1,8 +1,4 @@
-#**Behavioral Cloning** 
-
-##Writeup Template
-
-###You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
+**Write-up Behavioral Cloning** 
 
 ---
 
@@ -15,34 +11,28 @@ The goals / steps of this project are the following:
 * Test that the model successfully drives around track one without leaving the road
 * Summarize the results with a written report
 
-## Rubric Points
-###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
-
 ---
-###Files Submitted & Code Quality
 
-1. Submitted Files
+**1. Submitted Files**
 
 My project includes the following files:
 * model.py containing the script to create and train the model
 * drive.py for driving the car in autonomous mode
 * model.h5 containing a trained convolution neural network 
-* writeup_report.md summarizing the results
+* writeup.md summarizing the results
 * autonomous_driving_record.mp4 record of driving in autonomous mode
 
-2. Driving in autonomous mode
+**2. Driving in autonomous mode**
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
 ```sh
 python drive.py model.h5
 ```
 
-3. Description of model
+**3. Description of model**
 
 The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
 
-###Model Architecture and Training Strategy
-
-1. Model architecture
+**3.1. Model architecture**
 
 I started with the LeNet architecture and adapted the parameters and added some layers to make the network more powerful. My final model consists of the following layers:
 
@@ -52,19 +42,19 @@ I started with the LeNet architecture and adapted the parameters and added some 
 * Flattening
 * 4 fully connected layers with dropout layers (to reduce overfitting) in-between
 
-2. Extending and tuning the model
+**3.2. Extending and tuning the model**
 
 The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track. 
 Where this was not the case, I tried to extend and tune the model and/or generate more training data (see next two sections).
 With the final model, the car was able to stay on track for several laps (see recorded video autonomous_driving_record.mp4).
 
-3. Model parameter tuning
+**3.3. Model parameter tuning**
 
 The model used an adam optimizer, so the learning rate was not tuned manually. 
 Other parameters of the model that have been tuned are the filter sizes of the convolutional layers and the output size of the (first three) fully connected layers. 
 I did choose relatively small filter sizes for the convolutional layers and relatively large output sizes of the fully connected layers to make the network more powerful.
 
-4. Appropriate training data
+**3.4. Appropriate training data**
 
 I used the provided training data and concentrated on generating additional data from this data set using the following techniques:
 
